@@ -1,0 +1,9 @@
+{
+  "extensionDescription": {
+    "message": "Adds a context menu entry to enqueue albums directly from Bandcamp pages",
+    "description": ""
+  },
+  "enqueue": {
+    "message": "Enqueue in Bandamp"
+  }
+}
