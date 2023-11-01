@@ -3,7 +3,7 @@
     "message": "Adds a context menu entry to enqueue albums directly from Bandcamp pages",
     "description": ""
   },
-  "enqueue": {
+  "bandampHelperEnqueue": {
     "message": "Enqueue in Bandamp"
   }
 }

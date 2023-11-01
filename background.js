@@ -1,16 +1,15 @@
 browser.menus.create({
-    id: 'bandamp-enqueue',
-    title: browser.i18n.getMessage('enqueue'),
-    contexts: ['link']
+    title: browser.i18n.getMessage('bandampHelperEnqueue'),
+    contexts: ['link'],
+    onclick: bandampHelperEnqueue
 });
 
-browser.menus.onClicked.addListener((info, tab) => {
-    if (info.menuItemId !== 'bandamp-enqueue') {
-        return;
-    }
-
+function bandampHelperEnqueue(info) {
     const albumUrl = info.linkUrl;
-    if (!albumUrl.includes('.bandcamp.com/album/')) {
+    if (
+        !albumUrl.includes('.bandcamp.com/album/')
+        && !albumUrl.includes('.bandcamp.com/track/')
+    ) {
         return;
     }
 
@@ -27,4 +26,4 @@ browser.menus.onClicked.addListener((info, tab) => {
                 `
         });
     });
-});
+}
