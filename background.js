@@ -1,10 +1,16 @@
+const BANDAMP_URL = 'https://bandamp.fly.dev';
+const TAB_STATUS = {
+    loading: 'loading',
+    complete: 'complete'
+};
+
 browser.menus.create({
     title: browser.i18n.getMessage('bandampHelperEnqueue'),
     contexts: ['link'],
-    onclick: bandampHelperEnqueue
+    onclick: bandampHelperEnqueueAction
 });
 
-function bandampHelperEnqueue(info) {
+function bandampHelperEnqueueAction(info) {
     const albumUrl = info.linkUrl;
     if (
         !albumUrl.includes('.bandcamp.com/album/')
@@ -13,17 +19,39 @@ function bandampHelperEnqueue(info) {
         return;
     }
 
+    bandampHelperEnqueue(albumUrl);
+}
+
+function bandampHelperEnqueue(albumUrl) {
     browser.tabs.query({ currentWindow: true }).then((tabs) => {
-        const bandampTab = tabs.find((tab) => tab.url.includes('https://bandamp.fly.dev'))
-        if (!bandampTab) {
-            return;
+        const bandampTab = tabs.find((tab) => tab.url.includes(BANDAMP_URL))
+        if (bandampTab) {
+            return bandampHelperExecuteScript(bandampTab.id, albumUrl);
         }
 
-        browser.tabs.executeScript(bandampTab.id, {
-            code: `
+        const bandampTabLoadedListener = (tabId, changeInfo, tab) => {
+            if (!tab.url.startsWith(BANDAMP_URL) || tab.status !== TAB_STATUS.complete) {
+                return;
+            }
+
+            browser.tabs.onUpdated.removeListener(bandampTabLoadedListener);
+            bandampHelperEnqueue(albumUrl);
+        }
+        browser.tabs.onUpdated.addListener(bandampTabLoadedListener);
+
+        browser.tabs.create({
+            url: BANDAMP_URL,
+            active: false,
+            pinned: true
+        });
+    });
+}
+
+function bandampHelperExecuteScript(tabId, albumUrl) {
+    browser.tabs.executeScript(tabId, {
+        code: `
                 document.querySelector('.playlist-controls__album-url').value='${albumUrl}'; 
                 document.querySelector('.playlist-controls__add').click();
                 `
-        });
     });
 }
